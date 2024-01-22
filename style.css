@@ -1,0 +1,7 @@
+.swipeable-element {
+    background-color: lightcoral;
+    padding: 20px;
+    text-align: center;
+    user-select: none; /* Prevents selection during swipe */
+    touch-action: none; 
+}
