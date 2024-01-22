@@ -3,7 +3,7 @@ let elements = [
     { id: 'element2', text: 'Swipe me away! (2)' },
     { id: 'element3', text: 'Swipe me away! (3)' },
     { id: 'element3', text: 'Swipe me away! (4)' },
-    { id: 'element3', text: 'Swipe me away! (5)' }
+    { id: 'element3', text: 'Swipe me away! (5)' },
 ];
 
 const container = document.getElementById('container');
@@ -25,21 +25,28 @@ const attachSwipeEvents = (elem) => {
         startX = posX;
         movedX = 0;
         isDragging = true;
+        // Bind move and end events
+        document.addEventListener('mousemove', moveDrag);
+        document.addEventListener('mouseup', endDrag);
     };
 
-    const moveDrag = (posX) => {
+    const moveDrag = (e) => {
         if (isDragging) {
-            movedX = posX - startX;
+            movedX = e.clientX - startX;
             elem.style.transform = `translateX(${movedX}px)`;
         }
     };
 
     const endDrag = () => {
+        // Unbind move and end events
+        document.removeEventListener('mousemove', moveDrag);
+        document.removeEventListener('mouseup', endDrag);
+
         if (Math.abs(movedX) > 150) { // Swipe threshold
             elem.style.transition = 'transform 0.3s';
             elem.style.transform = `translateX(${movedX > 0 ? 1000 : -1000}px)`;
             setTimeout(() => {
-                container.removeChild(elem);
+                elem.remove();
                 elements = elements.filter(el => el.id !== elem.id);
             }, 300);
         } else {
@@ -49,14 +56,16 @@ const attachSwipeEvents = (elem) => {
         isDragging = false;
     };
 
-    // Mouse Events
-    elem.addEventListener('mousedown', (e) => startDrag(e.clientX), false);
-    document.addEventListener('mousemove', (e) => moveDrag(e.clientX), false);
-    document.addEventListener('mouseup', endDrag, false);
-    // Touch Events
+    // Touch and Mouse events
     elem.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientX), false);
-    elem.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientX), false);
+    elem.addEventListener('touchmove', (e) => {
+        if (isDragging) {
+            movedX = e.touches[0].clientX - startX;
+            elem.style.transform = `translateX(${movedX}px)`;
+        }
+    }, false);
     elem.addEventListener('touchend', endDrag, false);
+    elem.addEventListener('mousedown', (e) => startDrag(e.clientX), false);
 };
 
 // Initial creation of elements
